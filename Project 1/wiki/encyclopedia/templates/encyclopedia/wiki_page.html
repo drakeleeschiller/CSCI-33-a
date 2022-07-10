@@ -5,5 +5,13 @@
 {% endblock %}
 
 {% block body %}
+
+<button id="edit" 
+type="submit"
+style="border: solid 1px; background-color: rgb(146, 177, 240); float: right;" 
+value="Edit"
+formaction="/edit/{{ title }}">Edit</button>
+<div>
     {{ content|safe }}
+</div>
 {% endblock %}
