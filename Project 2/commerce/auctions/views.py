@@ -70,7 +70,7 @@ def create_listing(request):
         description = request.POST.get("description", "")
         start_bid = request.POST.get("start_bid", 0)
         image = request.POST.get("image", None)
-        category = request.POST.get("category", "")
+        category = request.POST.get("category", None)
         return HttpResponseRedirect(reverse("index"))
     else:
         return render(request, "auctions/create_listing.html")
@@ -83,4 +83,16 @@ def show_listing(request, listing_id):
     return render(request, "auctions/show_listing.html", {
         "listing": listing,
     })
-    
+
+def filter_auctions(request):
+    if request.method == "GET":
+        print("I'm printing above!!!!")
+        cat = request.GET.get("category", None)
+        # cat = "HOM"
+        return render(request, "auctions/categories.html", {
+            "filtered_listings": Listing.objects.filter(category=cat).all()
+        })
+    print("I'm printing below!!!!")
+    return render(request, "auctions/index.html", {
+        "filtered_listings": Listing.objects.all()
+    })

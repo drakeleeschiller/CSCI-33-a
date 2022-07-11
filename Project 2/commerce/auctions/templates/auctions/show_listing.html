@@ -3,11 +3,12 @@
 {% block body %}
     <h2> {{ listing.title }}</h2>
 
-    <img src = "{{ listing.image.url }}">
+    <img src="{{ listing.image }}">
     <ul>
         <li>Description: {{ listing.description }}</li>
-        <li>Current bid: {{ listing.current_bid }}</li>
+        <li>Current price: {{ listing.current_bid }}</li>
         <li>Number of bids: {{ listing.num_bids }}</li>
+        <li>Category: {{ listing.category }}</li>
         <li> Active: 
             {% if listing.active %} 
             Yes

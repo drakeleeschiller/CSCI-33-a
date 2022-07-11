@@ -1,12 +1,24 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
-    <h2>Active Listings</h2>
-    
+    <h2>Categories</h2>
+
+    <form action="{% url 'filter_auctions' %}" method="get">
+        {% csrf_token %}
+        <select name="category" onchange='if(this.value != "") { this.form.submit(); }'>
+            <option value="">-----</option>
+            <option value="TOY">Toys</option>
+            <option value="TEC">Tech</option>
+            <option value="HOM">Home</option>
+            <option value="CLT">Clothes</option>
+            <option value="MIS">Miscellaneous</option>
+        </select>
+    </form>
+
     <div class="row">
         <div class="col-12 col-sm-12 col-lg-10">
             <ul class="list-group">
-            {% for listing in listings %}
+            {% for listing in filtered_listings %}
                 <li class="list-group-item d-flex justify-content-between align-items-center">
                 <div class="image-parent">
                     <a href="{% url 'show_listing' listing.id %}">
@@ -22,11 +34,15 @@
                     <div> Description: {{ listing.description }} </div>
                     <div> Current price: {{ listing.current_bid }} </div>
                     <div> Number of bids: {{ listing.num_bids }} </div>
-                    <div> Category: {{ listing.category }} </div>
                 </div>
                 </li>
+            {% empty %}
+             <strong>No items listed in this category.</strong>
             {% endfor %}
             </ul>
         </div>
     </div>
+
+    
+
 {% endblock %}
