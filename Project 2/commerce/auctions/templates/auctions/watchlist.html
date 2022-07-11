@@ -1,0 +1,32 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h2>{{ user.first_name }}'s Watchlist</h2>
+    
+    <div class="row">
+        <div class="col-12 col-sm-12 col-lg-10">
+            <ul class="list-group">
+            {% for listing in watchlist %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div class="image-parent">
+                    <a href="{% url 'show_listing' listing.id %}">
+                    <img src="{{ listing.image }}" class="img-fluid" alt="No image provided">
+                    </a>
+                </div>
+                <div class="container"> 
+                    <div> 
+                        <a href="{% url 'show_listing' listing.id %}" style="color: black"> 
+                        <strong> {{ listing.title }} </strong> 
+                        </a> 
+                    </div>
+                    <div> Description: {{ listing.description }} </div>
+                    <div> Current price: {{ listing.current_bid }} </div>
+                    <div> Number of bids: {{ listing.num_bids }} </div>
+                    <div> Category: {{ listing.category }} </div>
+                </div>
+                </li>
+            {% endfor %}
+            </ul>
+        </div>
+    </div>
+{% endblock %}

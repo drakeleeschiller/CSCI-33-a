@@ -5,7 +5,7 @@ from django.shortcuts import render
 from django.urls import reverse
 from django import forms
 
-from .models import User, Listing, Bid, Comment
+from .models import User, Listing, Bid, Comment, Watchlist
 
 def index(request):
     return render(request, "auctions/index.html", {
@@ -66,12 +66,27 @@ def register(request):
 
 def create_listing(request):
     if request.method == "POST":
+        user = request.user
         title = request.POST.get("title", "")
         description = request.POST.get("description", "")
         start_bid = request.POST.get("start_bid", 0)
         image = request.POST.get("image", None)
         category = request.POST.get("category", None)
-        return HttpResponseRedirect(reverse("index"))
+
+        listing = Listing(
+            owner=user,
+            title=title,
+            description=description,
+            start_bid=start_bid,
+            current_bid=start_bid,
+            num_bids=0,
+            image=image,
+            category=category,
+            active=True
+            )
+        listing.save()
+        listing_id = listing.id
+        return HttpResponseRedirect(reverse("show_listing", args=(listing_id,)))
     else:
         return render(request, "auctions/create_listing.html")
 
@@ -86,13 +101,20 @@ def show_listing(request, listing_id):
 
 def filter_auctions(request):
     if request.method == "GET":
-        print("I'm printing above!!!!")
         cat = request.GET.get("category", None)
-        # cat = "HOM"
         return render(request, "auctions/categories.html", {
             "filtered_listings": Listing.objects.filter(category=cat).all()
         })
-    print("I'm printing below!!!!")
     return render(request, "auctions/index.html", {
         "filtered_listings": Listing.objects.all()
+    })
+
+def watchlist(request):
+    try:
+        watchlist = Watchlist.objects.get(id = request.user)
+    except Watchlist.DoesNotExist:
+        raise Http404("Watchlist not found.")
+    return render(request, "auctions/watchlist.html", {
+        "user": watchlist.owner,
+        "watchlist": watchlist.listings,
     })

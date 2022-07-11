@@ -20,12 +20,17 @@ class Listing(models.Model):
     image = models.URLField(null=True, blank=True)
     category = models.CharField(max_length=64, blank=True, choices=CATEGORIES, default="MIS")
 
+    start_bid = models.IntegerField()
     current_bid = models.IntegerField()
     num_bids = models.IntegerField()
     active = models.BooleanField()
 
     def __str__(self):
         return f"{self.title}: {self.description}"
+
+class Watchlist(models.Model):
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="watchlist")
+    listings = models.ManyToManyField(Listing, blank=True, related_name="where_watched")
 
 class Bid(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="bids")

@@ -2,19 +2,24 @@
 
 {% block body %}
     <h2> {{ listing.title }}</h2>
-
-    <img src="{{ listing.image }}">
-    <ul>
-        <li>Description: {{ listing.description }}</li>
-        <li>Current price: {{ listing.current_bid }}</li>
-        <li>Number of bids: {{ listing.num_bids }}</li>
-        <li>Category: {{ listing.category }}</li>
-        <li> Active: 
-            {% if listing.active %} 
-            Yes
-            {% else %}
-            No
-            {% endif %}
-        </li>
-    </ul>
+    {% if listing.image %}
+        <img src="{{ listing.image }}">
+    {% else %}
+        No image provided
+    {% endif %}
+    <div>
+        <ul>
+            <li>Description: {{ listing.description }}</li>
+            <li>Current price: {{ listing.current_bid }}</li>
+            <li>Number of bids: {{ listing.num_bids }}</li>
+            <li>Category: {{ listing.category }}</li>
+            <li> Active: 
+                {% if listing.active %} 
+                Yes
+                {% else %}
+                No
+                {% endif %}
+            </li>
+        </ul>
+    </div>
 {% endblock %}
