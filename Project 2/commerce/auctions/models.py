@@ -12,6 +12,7 @@ class Listing(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="listings")
     title = models.CharField(max_length=64)
     description = models.CharField(max_length=256)
+    image = models.ImageField(null=True, blank=True)
 
     current_bid = models.IntegerField()
     num_bids = models.IntegerField()
@@ -25,7 +26,6 @@ class Bid(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="bids")
     listing = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name="bids")
     amount = models.FloatField()
-
 
 class Comment(models.Model):
     # TO-DO: Implement this class

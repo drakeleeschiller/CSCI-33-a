@@ -1,6 +1,6 @@
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from django import forms
@@ -8,7 +8,9 @@ from django import forms
 from .models import User, Listing, Bid, Comment
 
 def index(request):
-    return render(request, "auctions/index.html")
+    return render(request, "auctions/index.html", {
+        "listings": Listing.objects.all()
+    })
 
 
 def login_view(request):
@@ -62,21 +64,23 @@ def register(request):
     else:
         return render(request, "auctions/register.html")
 
-class NewListingForm(forms.Form):
-    title = forms.CharField(label="Title")
-    description = forms.CharField(label="Description")
-    start_bid = forms.FloatField(label="Starting bid")
-    image = forms.URLField(label="Image")
-    category = forms.CharField(label="Category")
-
 def create_listing(request):
     if request.method == "POST":
-        title = request.POST["username"]
-        description = request.POST["username"]
-        start_bid = request.POST["username"]
-        image = request.POST["username"]
-        category = request.POST["username"]
+        title = request.POST.get("title", "")
+        description = request.POST.get("description", "")
+        start_bid = request.POST.get("start_bid", 0)
+        image = request.POST.get("image", None)
+        category = request.POST.get("category", "")
         return HttpResponseRedirect(reverse("index"))
     else:
         return render(request, "auctions/create_listing.html")
+
+def show_listing(request, listing_id):
+    try:
+        listing = Listing.objects.get(id=listing_id)
+    except Listing.DoesNotExist:
+        raise Http404("Listing not found.")
+    return render(request, "auctions/show_listing.html", {
+        "listing": listing,
+    })
     
