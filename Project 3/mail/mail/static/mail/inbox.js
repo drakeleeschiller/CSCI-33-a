@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
   document.querySelector('#sent').addEventListener('click', () => load_mailbox('sent'));
   document.querySelector('#archived').addEventListener('click', () => load_mailbox('archive'));
   document.querySelector('#compose').addEventListener('click', compose_email);
+  document.querySelector('#emails-view').classList.add("list-group");
 
   // By default, load the inbox
   load_mailbox('inbox');
@@ -74,9 +75,14 @@ async function fetch_email_list(mailbox) {
 function display_email_list(email_list) {
   return email_list.forEach(email => {
     // TO-DO: Might want to change this later to a custom element
-    const element = document.createElement('div');
+    const element = document.createElement('a');
+    const style_list = ["list-group-item", "list-group-item-action", "flex-column", "align-items-start"];
+    element.classList.add(...style_list);
+    // TO-DO: Change this to correct href once view for a single email is created
+    element.href = '#'
     element.innerHTML = email['subject'];
     document.querySelector('#emails-view').append(element);
   });
 }
+
 
