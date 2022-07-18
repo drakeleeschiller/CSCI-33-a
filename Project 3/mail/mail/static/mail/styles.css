@@ -1,3 +1,7 @@
 textarea {
     min-height: 400px;
 }
+
+.read {
+    background-color: rgb(205, 199, 199);
+}
