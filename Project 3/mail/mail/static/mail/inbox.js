@@ -29,23 +29,23 @@ function compose_email() {
 
   // Send the email out on submission of the form
   document.querySelector('#compose-form').onsubmit = () => {
-    fetch('/emails', {
-      method: 'POST',
-      body: JSON.stringify({
-          recipients: compose_recipients.value,
-          subject: compose_subject.value,
-          body: compose_body.value
-      })
-    })
-    .then(response => response.json())
-    .then(result => {
-        // Print result
-        console.log(result);
-    });
+    send_email(compose_recipients.value, compose_subject.value, compose_body.value);
     load_mailbox('sent');
+
     // Prevent the actual submission of the form
     return false;
   }
+}
+
+function send_email(recipients, subject, body) {
+  fetch('/emails', {
+    method: 'POST',
+    body: JSON.stringify({
+        recipients: recipients,
+        subject: subject,
+        body: body
+    })
+  });
 }
 
 function load_mailbox(mailbox) {
@@ -60,11 +60,30 @@ function load_mailbox(mailbox) {
 
   // Iterate through the list of emails and put each one in a div
   fetch_email_list(mailbox).then(result => {
-    display_email_list(result, mailbox)
+    display_email_list(result, mailbox);
   })
 }
 
+async function view_message(email) {
+  // Show the message and hide other views
+  document.querySelector('#emails-view').style.display = 'none';
+  document.querySelector('#message-view').style.display = 'block';
+  document.querySelector('#compose-view').style.display = 'none';
 
+  response = 
+    await fetch('emails/' + email['id'], {
+      method: "GET"
+    }).then(response => response.json())
+  
+  const message_container = document.createElement('div');
+  const subject = document.createElement('h4');
+  subject.innerHTML = email['subject'];
+
+
+  document.querySelector('#message-view').append(message_container);
+  return false;
+
+}
 
 // Fetch the list of emails from a specific mailbox
 // Returns an array of dictionaries
@@ -78,29 +97,28 @@ async function fetch_email_list(mailbox) {
 // Create divs for and display each email in a list
 function display_email_list(email_list, mailbox) {
   return email_list.forEach(email => {
-    console.log("HAS THE EMAIL BEEN READ?:", email["read"])
     format_one_row(email, mailbox)
   });
 }
 
 function format_one_row(email, mailbox) {
-  console.log("MAILBOX IS:", mailbox);
   // Create the click-able parent box
-  const element = document.createElement('a');
+  const element = document.createElement('div');
 
-  // Add an event-listener if the row has been clicked, changing 'read' status to true
+  // Add an event-listener if the row has been clicked
   element.addEventListener('click', () => {
     // Immediately after clicking, set the bg color to grey
-    if (mailbox != 'sent'){
-      element.style.backgroundColor = "rgb(205, 199, 199)";
-    }
+    if (mailbox != 'sent'){element.style.backgroundColor = "rgb(205, 199, 199)";}
+    // Set the 'read' attribute of this email to true
     fetch(`/emails/${email['id']}`, {
       method: 'PUT',
       body: JSON.stringify({
           read: true
       })
     });
-  })
+    // View the message after all the other onclick handling
+    view_message(email);
+  });
 
   // Styling
   const element_list = ["list-group-item", "list-group-item-action", "flex-column", "align-items-start"];
@@ -109,10 +127,6 @@ function format_one_row(email, mailbox) {
     element.classList.add("read")
   }
   element.classList.add(...element_list);
-  // TO-DO: Change this to correct href once view for a single email is created
-  element.href = '#'
-
-
 
   // Create and format the row's content
   const row_content = document.createElement('div');
@@ -131,7 +145,7 @@ function format_one_row(email, mailbox) {
     <small>${email['timestamp']}</small>
     `;
   
-  // Add
+  // Add row with content to the 'emails-view' container
   element.append(row_content);
   document.querySelector('#emails-view').append(element);
 }
