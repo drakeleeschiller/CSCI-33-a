@@ -64,25 +64,41 @@ function load_mailbox(mailbox) {
   })
 }
 
-async function view_message(email) {
+function view_message(email) {
   // Show the message and hide other views
   document.querySelector('#emails-view').style.display = 'none';
   document.querySelector('#message-view').style.display = 'block';
   document.querySelector('#compose-view').style.display = 'none';
 
   response = 
-    await fetch('emails/' + email['id'], {
+    fetch('emails/' + email['id'], {
       method: "GET"
     }).then(response => response.json())
+
+  const message_view = document.querySelector('#message-view');
   
-  const message_container = document.createElement('div');
   const subject = document.createElement('h4');
   subject.innerHTML = email['subject'];
 
+  // subheader contains sender, recipients, and timestamp
+  const subheader = document.createElement('small')
+  subheader.innerHTML = `
+  <div class="d-flex justify-content-between">
+    <div>From: ${email['sender']}</div>
+    <div>${email['timestamp']}</div>
+  </div>
+  <div>To: ${email['recipients']}</div>
+  <hr>
+  `;
 
-  document.querySelector('#message-view').append(message_container);
+  const body = document.createElement('div');
+  body.innerHTML = email['body']
+
+  message_view.append(subject);
+  message_view.append(subheader);
+  message_view.append(body);
+
   return false;
-
 }
 
 // Fetch the list of emails from a specific mailbox
