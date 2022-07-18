@@ -69,7 +69,6 @@ function load_mailbox(mailbox) {
 
   // Iterate through the list of emails and put each one in a div
   fetch_email_list(mailbox).then(result => {
-    console.log("THE RESULT IS: ", result)
     display_email_list(result, mailbox);
   })
 }
@@ -173,8 +172,6 @@ function reply_body(email){
 
 function change_archive_state(email, mailbox) {
   // change state to archived
-  console.log("ARCHIVED STATE BEFORE: ", email['archived']);
-  console.log("mailbox is: ", mailbox)
   if (mailbox == 'inbox'){
     fetch(`/emails/${email['id']}`, {
       method: 'PUT',
@@ -192,7 +189,6 @@ function change_archive_state(email, mailbox) {
       })
     });
   }
-  console.log("ARCHIVED STATE AFTER: ", email['archived']);
 }
 
 // Fetch the list of emails from a specific mailbox
@@ -225,9 +221,8 @@ function format_one_row(email, mailbox) {
       body: JSON.stringify({
           read: true
       })
-    });
-    // View the message after all the other onclick handling
-    view_message(email, mailbox);
+      // View the message after all the other onclick handling
+    }).then(view_message(email, mailbox))
   });
 
   // Styling
