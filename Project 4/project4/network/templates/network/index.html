@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block body %}
-<div id="post_form">
+<div id="post_form" class="mb-3">
 {% if user.is_authenticated %}
     <form id="post_actual_form">
         <h4>Submit a new post</h4>
@@ -20,6 +20,16 @@
 <div id="profile"></div>
 
 <div id="all_posts"></div>
+
+<nav aria-label="Page navigation" class="justify-content-between">
+    <ul class="pagination">
+      <li class="page-item"><a class="page-link" href="#">Previous</a></li>
+      <li class="page-item"><a class="page-link" href="#">1</a></li>
+      <li class="page-item"><a class="page-link" href="#">2</a></li>
+      <li class="page-item"><a class="page-link" href="#">3</a></li>
+      <li class="page-item"><a class="page-link" href="#">Next</a></li>
+    </ul>
+</nav>
 {% endblock %}
 
 

@@ -70,7 +70,6 @@ def register(request):
 
 @csrf_exempt
 def posts_home(request):
-    print("in posts_home")
     # If the request is a POST request, then a user is trying to create a new post
     if request.method == "POST":
         # Get the request info via request.body (different from post_body)
@@ -81,9 +80,7 @@ def posts_home(request):
             owner=request.user,
             post_body=post_body,
         )
-        print("before", post)
         post.save()
-        print("after", post)
         return HttpResponse(status=204)
         # TO-DO: Figure out what to do after save
 
@@ -92,17 +89,14 @@ def get_posts(request):
     if request.method == "GET":
         # Get all the posts from the DB and return it
         posts = Post.objects.all()
-        print("type of posts is", type(posts))
         posts = posts.order_by("-timestamp").all()
         return JsonResponse([post.serialize() for post in posts], safe=False)
 
 @csrf_exempt
 def profile(request, username):
     # Query for requested user
-    print("Profile in views.py")
     try:
         user = User.objects.get(username=username)
-        print("user is ", user)
     except User.DoesNotExist:
         return JsonResponse({"error": "User not found."}, status=404)
 
@@ -128,23 +122,14 @@ def change_follow(request):
     user_context = data['user_context']
     user_context = User.objects.get(username=user_context)
 
-    print("username is", username)
-    print("user_context is", user_context)
-
-
     # If the user wants to unfollow someone, delete the Follow object in the table
     if request.method == 'DELETE':
-        print("DELETE clause")
-        print(Follow.objects.filter(
-            user = user_context, following_user = username
-        ))
         Follow.objects.filter(
             user = user_context, following_user = username
         ).delete()
     
      # If the user wants to follow someone, add the Follow object in the table
     elif request.method == 'POST':
-        print("POST clause")
         follow = Follow(user = user_context, following_user = username)
         follow.save()
     
@@ -159,13 +144,9 @@ def check_follow(request):
     username = User.objects.get(username=username)
     user_context = data['user_context']
     user_context = User.objects.get(username=user_context)
-    print("HELLO")
-    print(Follow.objects.filter(user = user_context).filter(following_user = username))
     if (Follow.objects.filter(user = user_context).filter(following_user = username)):
-        print("MODEL EXISTS / TRUE clause")
         return HttpResponse("true")
     else:
-        print("MODEL DOES NOT EXIST / FALSE clause")
         return HttpResponse("false")
 
 @csrf_exempt

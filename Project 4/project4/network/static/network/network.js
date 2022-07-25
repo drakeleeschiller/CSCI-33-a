@@ -1,10 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
 
-    // // Use buttons to toggle between views
-    // document.querySelector('#inbox').addEventListener('click', () => load_mailbox('inbox'));
-    // document.querySelector('#sent').addEventListener('click', () => load_mailbox('sent'));
-    // document.querySelector('#archived').addEventListener('click', () => load_mailbox('archive'));
-    // TO-DO: Change this so that compose post runs
+    // Use buttons to toggle between views
     document.querySelector('#all_posts').classList.add("list-group");
     document.querySelector('#all_posts').addEventListener('click', () => load_posts());
     // By default, load the posts
@@ -34,7 +30,6 @@ function submit_post(post_body) {
 }
 
 function load_posts() {
-    console.log("load_posts is being run")
     document.querySelector('#post_form').style.display = 'block';
 
     fetch_posts().then(post_list => {
@@ -87,17 +82,24 @@ function format_one_post(post) {
     const timestamp = document.createElement('small');
     timestamp.innerHTML = post['timestamp']
 
+    const like_button = document.createElement('button');
+    like_button.innerHTML = "Like"
+    button_list = ["btn", "btn-sm", "ml-2"];
+    like_button.classList.add(...button_list);
+    like_button.classList.add("btn-outline-primary");
+
     left_content = [author, body, likes];
     left_side.replaceChildren(...left_content);
 
-    right_content = [timestamp];
+    right_content = [timestamp, like_button];
     right_side.replaceChildren(...right_content);
+    right_side.classList.add('align-middle');
 
     content = [left_side, right_side];
 
     row_content.replaceChildren(...content);
 
-    // Add row with content to the 'emails-view' container
+    // Add row with content to the 'all-posts' container
     element.append(row_content);
     document.querySelector('#all_posts').append(element);
 }
@@ -113,14 +115,12 @@ function fetch_profile_data(username) {
 async function profile(username) {
     document.querySelector('#post_actual_form').style.display = 'none';
     document.querySelector('#profile').style.display = 'block';
-    console.log("PROFILE IS", document.querySelector('#profile'))
 
     const profile = document.querySelector('#profile');
     const profile_list = ["m-3"];
     profile.classList.add(...profile_list);
     let data = await fetch_profile_data(username)
 
-    console.log("data in profile is", data)
 
     // header contains the user's name
     const header = document.createElement('h4');
@@ -142,7 +142,6 @@ async function profile(username) {
     
     <hr>
     `;
-    console.log("data in profile is: ", data);
     const content = [header, subheader];
     profile.replaceChildren(...content);
     // Display posts authored by the current profile's user
@@ -229,7 +228,6 @@ async function following_posts(username){
     document.querySelector('#profile').style.display = 'none';
 
     let data = await fetch_profile_data(username);
-    console.log("data in following_posts is ", data);
     let following_post_list = await fetch(`fetch_following_posts`, {
         method: 'GET'
     }).then(response => response.json());
