@@ -6,17 +6,16 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
-
+from itertools import chain
 
 from .models import Post, User, Follow
 
 
 @csrf_exempt
-@login_required
 def index(request):
     return render(request, "network/index.html")
 
-
+@csrf_exempt
 def login_view(request):
     if request.method == "POST":
 
@@ -36,12 +35,12 @@ def login_view(request):
     else:
         return render(request, "network/login.html")
 
-
+@csrf_exempt
 def logout_view(request):
     logout(request)
     return HttpResponseRedirect(reverse("index"))
 
-
+@csrf_exempt
 def register(request):
     if request.method == "POST":
         username = request.POST["username"]
@@ -70,7 +69,6 @@ def register(request):
 
 
 @csrf_exempt
-@login_required
 def posts_home(request):
     print("in posts_home")
     # If the request is a POST request, then a user is trying to create a new post
@@ -89,16 +87,16 @@ def posts_home(request):
         return HttpResponse(status=204)
         # TO-DO: Figure out what to do after save
 
-
+@csrf_exempt
 def get_posts(request):
     if request.method == "GET":
         # Get all the posts from the DB and return it
         posts = Post.objects.all()
+        print("type of posts is", type(posts))
         posts = posts.order_by("-timestamp").all()
-        print("in get_posts", posts)
         return JsonResponse([post.serialize() for post in posts], safe=False)
 
-
+@csrf_exempt
 def profile(request, username):
     # Query for requested user
     print("Profile in views.py")
@@ -156,17 +154,40 @@ def change_follow(request):
 @csrf_exempt
 @login_required
 def check_follow(request):
-    print("request for follow is GET")
     data = json.loads(request.body)
     username = data['username']
     username = User.objects.get(username=username)
     user_context = data['user_context']
     user_context = User.objects.get(username=user_context)
     print("HELLO")
-    print(Follow.objects.all().filter(user = user_context).filter(following_user = username))
-    if (Follow.objects.all().filter(user = user_context).filter(following_user = username)):
+    print(Follow.objects.filter(user = user_context).filter(following_user = username))
+    if (Follow.objects.filter(user = user_context).filter(following_user = username)):
         print("MODEL EXISTS / TRUE clause")
         return HttpResponse("true")
     else:
         print("MODEL DOES NOT EXIST / FALSE clause")
         return HttpResponse("false")
+
+@csrf_exempt
+@login_required
+def fetch_following_posts(request):
+    username = request.user
+    username = User.objects.get(username=username)
+    following = list(Follow.objects.filter(user=username).values())
+    target_posts = []
+    following_users_id = []
+    for following_dict in following:
+        following_user_id = following_dict['following_user_id']
+        following_users_id.append(following_user_id)
+    
+    # iterate through all users this person follows and get those people's
+    for user_id in following_users_id:
+        user = User.objects.get(pk=user_id)
+        posts = Post.objects.filter(owner = user)
+        target_posts += posts
+    
+    posts = [post.serialize() for post in target_posts]
+    sorted_posts = sorted(posts, key=lambda x: x['timestamp'], reverse=True)
+
+    # target_posts = target_posts.order_by("-timestamp").all()
+    return JsonResponse(sorted_posts, safe=False)

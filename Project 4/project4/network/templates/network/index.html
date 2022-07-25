@@ -3,12 +3,19 @@
 
 {% block body %}
 <div id="post_form">
-    <form id="post_form">
-        <h1>Submit a new post</h1>
+{% if user.is_authenticated %}
+    <form id="post_actual_form">
+        <h4>Submit a new post</h4>
         <textarea class="form-control" id="post_body" placeholder="Create a new post..."></textarea>
         <input id="post_button" type="submit" class="btn btn-primary" />
     </form>
+    <script>
+        document.querySelector('#post_button').addEventListener('click', () => compose_post());
+    </script>
+
+{% endif %}
 </div>
+
 
 <div id="profile"></div>
 

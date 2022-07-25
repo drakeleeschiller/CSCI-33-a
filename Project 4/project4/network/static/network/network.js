@@ -5,16 +5,15 @@ document.addEventListener('DOMContentLoaded', function () {
     // document.querySelector('#sent').addEventListener('click', () => load_mailbox('sent'));
     // document.querySelector('#archived').addEventListener('click', () => load_mailbox('archive'));
     // TO-DO: Change this so that compose post runs
-    document.querySelector('#post_button').addEventListener('click', () => compose_post());
     document.querySelector('#all_posts').classList.add("list-group");
-    document.querySelector('#owner_profile').addEventListener('click', () => profile(document.querySelector('#owner_profile').innerHTML));
+    document.querySelector('#all_posts').addEventListener('click', () => load_posts());
     // By default, load the posts
+    document.querySelector('#all_posts').style.display = 'block';
     load_posts();
 });
 
 function compose_post() {
     const post_body = document.querySelector('#post_body');
-    // console.log("post body value is", post_body.value);
     document.querySelector('#post_form').onsubmit = () => {
         // Post the post on submission of the form
 
@@ -31,16 +30,14 @@ function submit_post(post_body) {
         body: JSON.stringify({
             post_body: post_body,
         })
-    }).then(response => response.json()).then(results => { console.log("response in submit post", response) });
+    }).then(response => console.log(response));
 }
 
 function load_posts() {
+    console.log("load_posts is being run")
     document.querySelector('#post_form').style.display = 'block';
-    document.querySelector('#profile').style.display = 'block';
 
-    console.log("fetch_posts is: ", fetch_posts())
     fetch_posts().then(post_list => {
-        console.log("post list in load post is", post_list);
         display_posts(post_list);
     });
 }
@@ -79,7 +76,6 @@ function format_one_post(post) {
     const author = document.createElement('h5');
     author.innerHTML = post['owner'];
     author.classList.add("mb-1");
-    author.addEventListener('click', () => { console.log("THIS IS RUNNING") });
     author.addEventListener('click', () => { profile(post['owner']) });
 
     const body = document.createElement('p');
@@ -115,8 +111,9 @@ function fetch_profile_data(username) {
 }
 
 async function profile(username) {
-    document.querySelector('#post_form').style.display = 'none';
+    document.querySelector('#post_actual_form').style.display = 'none';
     document.querySelector('#profile').style.display = 'block';
+    console.log("PROFILE IS", document.querySelector('#profile'))
 
     const profile = document.querySelector('#profile');
     const profile_list = ["m-3"];
@@ -145,7 +142,7 @@ async function profile(username) {
     
     <hr>
     `;
-    console.log("data is: ", data);
+    console.log("data in profile is: ", data);
     const content = [header, subheader];
     profile.replaceChildren(...content);
     // Display posts authored by the current profile's user
@@ -167,7 +164,6 @@ async function create_follow_button(username, user_context) {
     follow_button.classList.add("btn-outline-info");
 
     let is_following = await check_if_following(username, user_context);
-    console.log("is_following is running and the value is ", is_following);
 
     if (is_following) {
         follow_button.innerHTML = "Unfollow";
@@ -177,9 +173,7 @@ async function create_follow_button(username, user_context) {
     }
     follow_button.addEventListener('click', () => {
         check_if_following(username, user_context).then(is_following => {
-            console.log("in event listener, is_following is: ", is_following);
             change_follow_state(username, user_context, is_following);
-            console.log("in event listener, is_following is: ", is_following)
             if (follow_button.innerHTML === "Follow") {
                 follow_button.innerHTML = "Unfollow";
             }
@@ -195,7 +189,6 @@ async function create_follow_button(username, user_context) {
 
 // Checks if the current logged-in user is following the profile being viewed
 async function check_if_following(username, user_context) {
-    console.log("inside check_if_following")
     response = await fetch(`/check_follow`, {
         method: 'POST',
         body: JSON.stringify({
@@ -209,10 +202,7 @@ async function check_if_following(username, user_context) {
 
 function change_follow_state(username, user_context, is_following) {
     // change follow state to unfollowed
-    console.log("in change_follow_state");
-    console.log("is_following is ", is_following);
     if (is_following) {
-        console.log("IN DELETEEEE");
         fetch(`/change_follow`, {
             method: 'DELETE',
             body: JSON.stringify({
@@ -223,7 +213,6 @@ function change_follow_state(username, user_context, is_following) {
     }
     // change follow state to followed
     else {
-        console.log("IN POSTTTTTT");
         fetch(`/change_follow`, {
             method: 'POST',
             body: JSON.stringify({
@@ -233,3 +222,17 @@ function change_follow_state(username, user_context, is_following) {
         });
     }
 }
+
+// Given a user (via their username), only return posts by who they follow
+async function following_posts(username){
+    document.querySelector('#post_form').style.display = 'none';
+    document.querySelector('#profile').style.display = 'none';
+
+    let data = await fetch_profile_data(username);
+    console.log("data in following_posts is ", data);
+    let following_post_list = await fetch(`fetch_following_posts`, {
+        method: 'GET'
+    }).then(response => response.json());
+    display_posts(following_post_list)
+}
+
