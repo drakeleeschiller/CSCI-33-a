@@ -2,6 +2,11 @@
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
+import random
+from django.core.management.commands.runserver import Command
+
+port_number = random.randint(8000, 8888)
+Command.default_port = str(port_number)
 
 
 def main():

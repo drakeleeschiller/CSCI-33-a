@@ -6,19 +6,19 @@ class User(AbstractUser):
     pass
 
 class Post(models.Model):
-    owner = models.ForeignKey("User", on_delete=models.CASCADE, related_name="post")
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="post")
     post_body = models.CharField(max_length=280, blank=True)
-    timestamp = models.DateField(auto_now_add=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
     likes = models.IntegerField(default=0)
 
-    def __str__(self):
-        return self.text
+    def serialize(self):
+        return {
+            "owner": self.owner.username,
+            "post_body": self.post_body,
+            "timestamp": self.timestamp.strftime("%b %d %Y, %I:%M %p"),
+            "likes": self.likes,
+        }
 
-
-class Comment(models.Model):
-    owner = models.ForeignKey("User", on_delete=models.CASCADE, related_name="comment")
-    post = models.ForeignKey("Post", on_delete=models.CASCADE, related_name="post")
-    comment_body = models.CharField(max_length=280)
-
-    def __str__(self):
-            return self.text
+class Follow(models.Model):
+    user = models.ManyToManyField(User, related_name="following")
+    following_user = models.ManyToManyField(User, related_name="followers")

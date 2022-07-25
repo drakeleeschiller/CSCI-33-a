@@ -1,9 +1,21 @@
 {% extends "network/layout.html" %}
+{% load static %}
 
 {% block body %}
-<form id="post_form">
-    <h1>Submit a new post</h1>
-    <textarea class="form-control" id="post_body" placeholder="Create a new post..."></textarea>
-    <input type="submit" class="btn btn-primary" />
-</form>
+<div id="all_posts">
+    <form id="post_form">
+        <h1>Submit a new post</h1>
+        <textarea class="form-control" id="post_body" placeholder="Create a new post..."></textarea>
+        <input id="post_button" type="submit" class="btn btn-primary" />
+    </form>
+</div>
+
+
+<div id="profile">
+</div>
+{% endblock %}
+
+
+{% block script %}
+    <script src="{% static 'network/network.js' %}"></script>
 {% endblock %}
