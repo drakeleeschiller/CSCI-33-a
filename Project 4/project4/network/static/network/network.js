@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // document.querySelector('#archived').addEventListener('click', () => load_mailbox('archive'));
     // TO-DO: Change this so that compose post runs
     document.querySelector('#post_button').addEventListener('click', () => compose_post());
-    document.querySelector('#posts_view').classList.add("list-group");
+    document.querySelector('#all_posts').classList.add("list-group");
     document.querySelector('#owner_profile').addEventListener('click', () => profile(document.querySelector('#owner_profile').innerHTML));
     console.log("1");
     // By default, load the posts
@@ -39,11 +39,12 @@ function submit_post(post_body) {
 
 function load_posts() {
     console.log("2");
-    document.querySelector('#all_posts').style.display = 'block';
-    document.querySelector('#profile').style.display = 'none';
+    document.querySelector('#post_form').style.display = 'block';
+    document.querySelector('#profile').style.display = 'block';
 
     console.log("fetch_posts is: ", fetch_posts())
     fetch_posts().then(post_list => {
+        console.log("post list in load post is", post_list);
         display_posts(post_list);
     });
 }
@@ -61,12 +62,14 @@ async function fetch_posts() {
 
 function display_posts(posts) {
     console.log("4");
+    document.querySelector('#all_posts').innerHTML = null;
     return posts.forEach(post => {
         format_one_post(post)
     });
 }
 
 function format_one_post(post) {
+    // post = post.serialize();
     console.log("5");
     const element = document.createElement('div');
 
@@ -78,22 +81,47 @@ function format_one_post(post) {
     row_content_style_list = ["d-flex", "w-100", "justify-content-between"]
     row_content.classList.add(...row_content_style_list)
 
+    const left_side = document.createElement('div');
+    const right_side = document.createElement('div');
 
-    let owner = post['owner'];
+    // Create the content for a single row/post
+    const author = document.createElement('h5');
+    author.innerHTML = post['owner'];
+    author.classList.add("mb-1");
+    author.addEventListener('click', () => {console.log("THIS IS RUNNING")});
+    author.addEventListener('click', () => {profile(post['owner'])});
 
-    // Nice to have: Change the sender to be the name of the sender, not their email
-    row_content.innerHTML = `
-    <div>
-      <h5 class="mb-1">${owner}</h5>
-      <p>${post['post_body']}</p>
-      <small>${post['likes']} likes</small>
-    </div>
-    <small>${post['timestamp']}</small>
-    `;
+    const body = document.createElement('p');
+    body.innerHTML = post['post_body']
+
+    const likes = document.createElement('small');
+    likes.innerHTML = post['likes']
+
+    const timestamp = document.createElement('small');
+    timestamp.innerHTML = post['timestamp']
+
+    left_content = [author, body, likes];
+    left_side.replaceChildren(...left_content);
+
+    right_content = [timestamp];
+    right_side.replaceChildren(...right_content);
+
+    content = [left_side, right_side];
+
+    row_content.replaceChildren(...content);
+
+    // row_content.innerHTML = `
+    // <div>
+    //   <h5 class="mb-1">${owner}</h5>
+    //   <p>${post['post_body']}</p>
+    //   <small>${post['likes']} likes</small>
+    // </div>
+    // <small>${post['timestamp']}</small>
+    // `;
 
     // Add row with content to the 'emails-view' container
     element.append(row_content);
-    document.querySelector('#posts_view').append(element);
+    document.querySelector('#all_posts').append(element);
 }
 
 function fetch_profile_data(username) {
@@ -105,8 +133,9 @@ function fetch_profile_data(username) {
 }
 
 async function profile(username) {
-    document.querySelector('#all_posts').style.display = 'none';
+    document.querySelector('#post_form').style.display = 'none';
     document.querySelector('#profile').style.display = 'block';
+
 
     console.log("profile in network.js")
     const profile = document.querySelector('#profile');
@@ -124,16 +153,23 @@ async function profile(username) {
     const subheader = document.createElement('small');
     subheader.innerHTML = `
     <div class="d-flex justify-content-between">
-        <div>Followers: ${user['followers']}</div>
+        <div>Followers: ${data['followers']}</div>
     </div>
     <div class="d-flex justify-content-between">
-        <div>Following: ${user['following']}</div>
+        <div>Following: ${data['following']}</div>
     </div>
     <hr>
     `;
     // TO-DO: Show the posts from this user and refactor view_posts to take in a user id?
-
-    const content = [header, subheader];
-    profile.replaceChildren(...content)
+    const user_posts = document.createElement("div");
+    // console.log("data['posts'] is: ", data['posts']);
+    console.log("display_posts is", display_posts(data['posts']));
+    user_posts.innerHTML = display_posts(data['posts']);
+    console.log("user_posts is: ",user_posts);
+    // const test = document.createElement("div");
+    // test.innerHTML = "HELLLLOOO";
+    // user_posts.append(test);
+    const content = [header, subheader, user_posts];
+    profile.replaceChildren(...content);
     return false;
 }

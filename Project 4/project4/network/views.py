@@ -111,7 +111,8 @@ def profile(request, username):
     # Return the user's information
     if request.method == "GET":
         name = user.username
-        posts_by_user = list(Post.objects.filter(owner=user).values())
+        posts_by_user = Post.objects.filter(owner=user)
+        posts_by_user = [post.serialize() for post in posts_by_user]
         followers = list(Follow.objects.filter(following_user=user).values())
         following = list(Follow.objects.filter(user=user).values())
 
