@@ -110,10 +110,63 @@ def profile(request, username):
 
     # Return the user's information
     if request.method == "GET":
+        # user_context is the username of the person currently logged in
+        user_context = request.user.username
         name = user.username
         posts_by_user = Post.objects.filter(owner=user)
         posts_by_user = [post.serialize() for post in posts_by_user]
         followers = list(Follow.objects.filter(following_user=user).values())
         following = list(Follow.objects.filter(user=user).values())
+        # return JsonResponse({"name": name, "posts": posts_by_user, "followers": followers, "following": following,})
 
-        return JsonResponse({"name": name, "posts": posts_by_user, "followers": followers, "following": following})
+        return JsonResponse({"name": name, "posts": posts_by_user, "followers": followers, "following": following, "user_context": user_context,})
+
+@csrf_exempt
+@login_required
+def change_follow(request):
+    data = json.loads(request.body)
+    username = data['username']
+    username = User.objects.get(username=username)
+    user_context = data['user_context']
+    user_context = User.objects.get(username=user_context)
+
+    print("username is", username)
+    print("user_context is", user_context)
+
+
+    # If the user wants to unfollow someone, delete the Follow object in the table
+    if request.method == 'DELETE':
+        print("DELETE clause")
+        print(Follow.objects.filter(
+            user = user_context, following_user = username
+        ))
+        Follow.objects.filter(
+            user = user_context, following_user = username
+        ).delete()
+    
+     # If the user wants to follow someone, add the Follow object in the table
+    elif request.method == 'POST':
+        print("POST clause")
+        follow = Follow(user = user_context, following_user = username)
+        follow.save()
+    
+    return HttpResponse(status=204)
+
+# Check if the follow object exists; if it throws an error during get, then it doesn't
+@csrf_exempt
+@login_required
+def check_follow(request):
+    print("request for follow is GET")
+    data = json.loads(request.body)
+    username = data['username']
+    username = User.objects.get(username=username)
+    user_context = data['user_context']
+    user_context = User.objects.get(username=user_context)
+    print("HELLO")
+    print(Follow.objects.all().filter(user = user_context).filter(following_user = username))
+    if (Follow.objects.all().filter(user = user_context).filter(following_user = username)):
+        print("MODEL EXISTS / TRUE clause")
+        return HttpResponse("true")
+    else:
+        print("MODEL DOES NOT EXIST / FALSE clause")
+        return HttpResponse("false")

@@ -20,5 +20,5 @@ class Post(models.Model):
         }
 
 class Follow(models.Model):
-    user = models.ManyToManyField(User, related_name="following")
-    following_user = models.ManyToManyField(User, related_name="followers")
+    user = models.ForeignKey(User, related_name="following", on_delete=models.CASCADE)
+    following_user = models.ForeignKey(User, related_name="followers", on_delete=models.CASCADE)
