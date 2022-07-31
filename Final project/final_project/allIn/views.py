@@ -13,7 +13,7 @@ from .models import Post, User, Follow
 
 @csrf_exempt
 def index(request):
-    return render(request, "all-in/index.html")
+    return render(request, "allIn/index.html")
 
 @csrf_exempt
 def login_view(request):
@@ -29,11 +29,11 @@ def login_view(request):
             login(request, user)
             return HttpResponseRedirect(reverse("index"))
         else:
-            return render(request, "all-in/login.html", {
+            return render(request, "allIn/login.html", {
                 "message": "Invalid username and/or password."
             })
     else:
-        return render(request, "all-in/login.html")
+        return render(request, "allIn/login.html")
 
 @csrf_exempt
 def logout_view(request):
@@ -50,7 +50,7 @@ def register(request):
         password = request.POST["password"]
         confirmation = request.POST["confirmation"]
         if password != confirmation:
-            return render(request, "all-in/register.html", {
+            return render(request, "allIn/register.html", {
                 "message": "Passwords must match."
             })
 
@@ -59,13 +59,13 @@ def register(request):
             user = User.objects.create_user(username, email, password)
             user.save()
         except IntegrityError:
-            return render(request, "all-in/register.html", {
+            return render(request, "allIn/register.html", {
                 "message": "Username already taken."
             })
         login(request, user)
         return HttpResponseRedirect(reverse("index"))
     else:
-        return render(request, "all-in/register.html")
+        return render(request, "allIn/register.html")
 
 
 @csrf_exempt
