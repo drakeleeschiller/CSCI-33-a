@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Use buttons to toggle between views
     document.querySelector('#all_posts').classList.add("list-group");
-    document.querySelector('#all_posts').addEventListener('click', () => load_posts());
+    document.querySelector('#all_posts').addEventListener('click', load_posts);
     // By default, load the posts
     document.querySelector('#all_posts').style.display = 'block';
     load_posts();
@@ -48,6 +48,8 @@ async function fetch_posts() {
 
 function display_posts(posts) {
     document.querySelector('#all_posts').innerHTML = null;
+    document.querySelector('#all_posts').style.display = 'block';
+
     return posts.forEach(post => {
         format_one_post(post)
     });
@@ -56,16 +58,18 @@ function display_posts(posts) {
 function format_one_post(post) {
     const element = document.createElement('div');
 
-    const element_list = ["list-group-item", "list-group-item-action", "flex-column", "align-items-start"];
+    const element_list = ["list-group-item", "list-group-item-action", "flex-column", "align-items-start", "d-flex"];
     element.classList.add(...element_list);
 
     // Create and format the row's content
     const row_content = document.createElement('div');
-    row_content_style_list = ["d-flex", "w-100", "justify-content-between", "m"]
+    row_content_style_list = ["d-flex", "w-100", "justify-content-between", "m", "row"]
     row_content.classList.add(...row_content_style_list)
 
     const left_side = document.createElement('div');
+    left_side.className = "col-6";
     const right_side = document.createElement('div');
+    right_side.className = "col-4";
 
     // Create the content for a single row/post
     const author = document.createElement('h5');
@@ -79,7 +83,7 @@ function format_one_post(post) {
     const likes = document.createElement('small');
     likes.innerHTML = `${post['likes']} likes`
 
-    const timestamp = document.createElement('small');
+    const timestamp = document.createElement('div');
     timestamp.innerHTML = post['timestamp']
 
     const like_button = document.createElement('button');
@@ -87,17 +91,29 @@ function format_one_post(post) {
     button_list = ["btn", "btn-sm", "ml-2"];
     like_button.classList.add(...button_list);
     like_button.classList.add("btn-outline-primary");
+    const balance = 10000;
+    const balance_string = balance.toLocaleString('en-us', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+    const investment_stuff =
+        `<div class="flex justify-content-center col-2 text-right">
+        <div>${balance_string}</div>
+        <div class="${Math.random() - 0.5 > 0 ? "text-success" : "text-danger"} "> +$10</span>
+     </div>`;
 
     left_content = [author, body, likes];
     left_side.replaceChildren(...left_content);
 
     right_content = [timestamp, like_button];
     right_side.replaceChildren(...right_content);
-    right_side.classList.add('align-middle');
+    right_side.style.textAlign = "right";
+
+    // right_side.classList.add('text-align-right');
 
     content = [left_side, right_side];
 
     row_content.replaceChildren(...content);
+
+    right_side.insertAdjacentHTML("beforebegin", investment_stuff);
+
 
     // Add row with content to the 'all-posts' container
     element.append(row_content);
@@ -114,13 +130,13 @@ function fetch_profile_data(username) {
 
 async function profile(username) {
     document.querySelector('#post_actual_form').style.display = 'none';
+    document.querySelector('#investment_page').style.display = 'none';
     document.querySelector('#profile').style.display = 'block';
 
     const profile = document.querySelector('#profile');
     const profile_list = ["m-3"];
     profile.classList.add(...profile_list);
-    let data = await fetch_profile_data(username)
-
+    let data = await fetch_profile_data(username);
 
     // header contains the user's name
     const header = document.createElement('h4');
@@ -130,14 +146,37 @@ async function profile(username) {
     follow_button = await create_follow_button(username, data['user_context']);
     header.append(follow_button);
 
+    const profile_balance = 10000;
+    const profile_balance_string = profile_balance.toLocaleString('en-us', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+
+
     // subheader contains followers and following info, and the follow button
-    const subheader = document.createElement('small');
+    const subheader = document.createElement('div');
+    subheader.className = "d-flex row";
     subheader.innerHTML = `
-    <div class="d-flex justify-content-between">
+    <div class="col-2">
+    <div>
         <div>Followers: ${data['followers'].length}</div>
     </div>
-    <div class="d-flex justify-content-between">
+    <div>
         <div>Following: ${data['following'].length}</div>
+    </div>
+    </div>
+
+    <div class="col-3">
+    <div>
+        <div>Balance: ${profile_balance_string}</div>
+    </div>
+    <div>
+        <span> Daily net: </span>
+        <span class="${Math.random() - 0.5 > 0 ? "text-success" : "text-danger"}"> +$10</span>
+    </div>
+    <div>
+        <span> Stock of the day: </span>
+        <span class="${Math.random() - 0.5 > 0 ? "text-success" : "text-danger"} "> $NFLX<span>
+    </div>
+    </div>
+
     </div>
     
     <hr>
@@ -147,6 +186,51 @@ async function profile(username) {
     // Display posts authored by the current profile's user
     display_posts(data['posts']);
     return false;
+}
+
+function show_investment_page(username) {
+    post_actual_form.style.display = 'none';
+    document.querySelector('#investment_page').style.display = 'block';
+    document.querySelector('#profile').style.display = 'none';
+    document.querySelector('#all_posts').style.display = 'none';
+
+    const balance = 10000;
+    const balance_string = balance.toLocaleString('en-us', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+
+    const desposit_form = 
+    `
+    <form class="form-inline">
+        <div class="form-group mx-sm-3 mb-2">
+            <input type="number" class="form-control" id="deposit-form" placeholder="0">
+        </div>
+        <button type="submit" class="btn btn-primary mb-2">Deposit!</button>
+    </form>
+    `;
+
+    const stock_form = 
+    `
+    <form class="form-inline">
+        <div class="form-group mx-sm-3 mb-2">
+            <input type="text" class="form-control" id="stock-form" placeholder="0">
+        </div>
+        <button type="submit" class="btn btn-primary mb-2">Invest!</button>
+    </form>
+    `;
+
+    investment_page.innerHTML =
+    `
+    <div id="p-header">${username}</div>
+    <div id="p-content"> 
+        <div id="p-balance">Balance: ${balance_string}</div>
+        <div id="p-deposit">${desposit_form}</div>
+        <div id="p-invest">${stock_form}</div>
+        <div id="p-graph"></div>
+    </div>
+    `;
+    // Styling for the portfolio's header
+    document.querySelector("#p-header").className = "d-flex align-items-center mb-3 mb-lg-0 me-lg-auto text-dark text-decoration-none";
+
+
 }
 
 async function create_follow_button(username, user_context) {
@@ -194,9 +278,9 @@ async function check_if_following(username, user_context) {
             username: username,
             user_context: user_context,
         })
-    }).then(response => response.json());
-    return (await response === true);
-
+    })
+    response = response.json();
+    return (response === true);
 }
 
 function change_follow_state(username, user_context, is_following) {
@@ -223,9 +307,11 @@ function change_follow_state(username, user_context, is_following) {
 }
 
 // Given a user (via their username), only return posts by who they follow
-async function following_posts(username){
+async function following_posts(username) {
     document.querySelector('#post_form').style.display = 'none';
     document.querySelector('#profile').style.display = 'none';
+    document.querySelector('#investment_page').style.display = 'none';
+
 
     let data = await fetch_profile_data(username);
     let following_post_list = await fetch(`fetch_following_posts`, {

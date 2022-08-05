@@ -33,10 +33,14 @@
                         <a id="following_posts" class="nav-link" href="#">Following</a>
                     </li>
                     <li class="nav-item">
+                        <a id="investment_link" class="nav-link" href="#">Portfolio</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
                     </li>
                     <script type="text/javascript">
                         document.querySelector('#following_posts').addEventListener('click', () => {following_posts(document.querySelector('#owner_profile').innerHTML)});
+                        document.querySelector('#investment_link').addEventListener('click', () => {show_investment_page(document.querySelector('#owner_profile').innerHTML)});
                     </script>
                 {% else %}
                     <li class="nav-item">

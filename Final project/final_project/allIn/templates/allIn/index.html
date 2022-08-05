@@ -6,7 +6,7 @@
 {% if user.is_authenticated %}
     <form id="post_actual_form">
         <h4>Submit a new post</h4>
-        <textarea class="form-control" id="post_body" placeholder="Create a new post..."></textarea>
+        <textarea class="form-control mb-2" id="post_body" placeholder="Create a new post..."></textarea>
         <input id="post_button" type="submit" class="btn btn-primary" />
     </form>
     <script>
@@ -19,7 +19,9 @@
 
 <div id="profile"></div>
 
-<div id="all_posts"></div>
+<div id="all_posts" class="mb-3"></div>
+
+<div id="investment_page"></div>
 
 <nav aria-label="Page navigation" class="justify-content-between">
     <ul class="pagination">
