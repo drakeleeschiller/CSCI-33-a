@@ -49,13 +49,16 @@ async function fetch_posts() {
 function display_posts(posts) {
     document.querySelector('#all_posts').innerHTML = null;
     document.querySelector('#all_posts').style.display = 'block';
+    const user_context = document.querySelector('#owner_profile').innerHTML;
 
     return posts.forEach(post => {
-        format_one_post(post)
+        format_one_post(post, user_context)
     });
 }
 
-function format_one_post(post) {
+// user_context is the username of the person logged in right now
+// An improvement would be passing in the actual user object or the user id
+function format_one_post(post, user_context) {
     const element = document.createElement('div');
 
     const element_list = ["list-group-item", "list-group-item-action", "flex-column", "align-items-start", "d-flex"];
@@ -91,6 +94,14 @@ function format_one_post(post) {
     button_list = ["btn", "btn-sm", "ml-2"];
     like_button.classList.add(...button_list);
     like_button.classList.add("btn-outline-primary");
+    like_button.addEventListener('click', async () => {
+        await change_likes_count(post, user_context).then(async (response) => { 
+            like_button.innerHTML = response;
+            console.log("response is ", response);
+            console.log("like_button.innerHTML is ", like_button.innerHTML)
+        });
+    });
+
     const balance = 10000;
     const balance_string = balance.toLocaleString('en-us', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
     const investment_stuff =
@@ -173,7 +184,7 @@ async function profile(username) {
     </div>
     <div>
         <span> Stock of the day: </span>
-        <span class="${Math.random() - 0.5 > 0 ? "text-success" : "text-danger"} "> $NFLX<span>
+        <span class="${Math.random() - 0.5 > 0 ? "text-success" : "text-danger"} ">$NFLX<span>
     </div>
     </div>
 
@@ -196,9 +207,10 @@ function show_investment_page(username) {
 
     const balance = 10000;
     const balance_string = balance.toLocaleString('en-us', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+    const current_stock = "$NFLX"
 
-    const desposit_form = 
-    `
+    const desposit_form =
+        `
     <form class="form-inline">
         <div class="form-group mx-sm-3 mb-2">
             <input type="number" class="form-control" id="deposit-form" placeholder="0">
@@ -207,8 +219,8 @@ function show_investment_page(username) {
     </form>
     `;
 
-    const stock_form = 
-    `
+    const stock_form =
+        `
     <form class="form-inline">
         <div class="form-group mx-sm-3 mb-2">
             <input type="text" class="form-control" id="stock-form" placeholder="0">
@@ -218,10 +230,11 @@ function show_investment_page(username) {
     `;
 
     investment_page.innerHTML =
-    `
+        `
     <div id="p-header">${username}</div>
     <div id="p-content"> 
         <div id="p-balance">Balance: ${balance_string}</div>
+        <div id="p-current_stock">Current stock: ${current_stock}</div>
         <div id="p-deposit">${desposit_form}</div>
         <div id="p-invest">${stock_form}</div>
         <div id="p-graph"></div>
@@ -304,6 +317,21 @@ function change_follow_state(username, user_context, is_following) {
             })
         });
     }
+}
+
+// is_increased parameter is either true (+1) or false (-1)
+async function change_likes_count(post, user_context) {
+    await fetch('/change_likes', {
+        method: 'POST',
+        body: JSON.stringify({
+            post: post,
+            user_context: user_context,
+        })
+    }).then(async (response) => {
+        data = await response.json();
+    });
+    console.log("data is ", data['button_new_state'])
+    return Promise.resolve(data['button_new_state']);
 }
 
 // Given a user (via their username), only return posts by who they follow

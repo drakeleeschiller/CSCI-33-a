@@ -112,6 +112,24 @@ def profile(request, username):
         # return JsonResponse({"name": name, "posts": posts_by_user, "followers": followers, "following": following,})
 
         return JsonResponse({"name": name, "posts": posts_by_user, "followers": followers, "following": following, "user_context": user_context,})
+@csrf_exempt
+@login_required
+def change_likes(request):
+    data = json.loads(request.body)
+    post = Post.objects.get(pk=data['post']['post_id'])
+    user_context = User.objects.get(username=data['user_context'])
+    change = 1
+    button_new_state = "Like"
+    if post.users_that_liked.filter(pk=user_context.pk).exists():
+        post.users_that_liked.remove(user_context)
+        change = -1
+    else:
+        post.users_that_liked.add(user_context)
+        button_new_state = "Unlike"
+    
+    post.likes += change
+    post.save()
+    return JsonResponse({"button_new_state": button_new_state})
 
 @csrf_exempt
 @login_required
@@ -172,3 +190,5 @@ def fetch_following_posts(request):
 
     # target_posts = target_posts.order_by("-timestamp").all()
     return JsonResponse(sorted_posts, safe=False)
+
+
